@@ -18,11 +18,9 @@ A highly customizable and intelligent Flutter tooltip widget that automatically 
 | Feature | Screenshot |
 |---------|------------|
 | **Basic Tooltip Bottom** | ![Basic Tooltip Bottom](assets/tooltip-bottom.png) |
-| **Different Directions Right** | ![Directions](assets/tooltip-right.png) |
+| **Different Directions - Right** | ![Directions](assets/tooltip-right.png) |
 | **Changes position if there is no space** | ![Changes position if there is no space](assets/tooltip-bottom-top-nospace.png) |
 | **Styling** | ![Styling](assets/tooltip-different-style.png) |
-
-*Replace the image paths above with your actual screenshots*
 
 ## 📦 Installation
 
