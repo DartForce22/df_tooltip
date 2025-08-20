@@ -17,10 +17,10 @@ A highly customizable and intelligent Flutter tooltip widget that automatically 
 
 | Feature | Screenshot |
 |---------|------------|
-| **Basic Tooltip** | ![Basic Tooltip](screenshots/basic_tooltip.png) |
-| **Different Directions** | ![Directions](screenshots/directions.png) |
-| **Custom Styling** | ![Custom Styling](screenshots/custom_styling.png) |
-| **In Scrollable Content** | ![Scrollable](screenshots/scrollable_content.png) |
+| **Basic Tooltip Bottom** | ![Basic Tooltip Bottom](assets/tooltip-bottom.png) |
+| **Different Directions Right** | ![Directions](assets/tooltip-right.png) |
+| **Changes position if there is no space** | ![Changes position if there is no space](assets/tooltip-bottom-top-nospace.png) |
+| **Styling** | ![Styling](assets/tooltip-different-style.png) |
 
 *Replace the image paths above with your actual screenshots*
 
