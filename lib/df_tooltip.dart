@@ -69,6 +69,9 @@ class DFTooltip extends StatefulWidget {
   /// [duration] specifies how long the tooltip should be visible before auto-hiding (null means manual hide only).
   /// [margin] is the space between the tooltip and the target widget (default is 0.0).
   /// [sideTooltipWidth] is the custom width for left/right tooltips (default is null, which means it will use 50% of the screen width).
+  /// [upnDownTooltipWidth] is the custom width for up/down tooltips (default is null, which means it will use full width minus margins).
+  /// [bgColor] is the background color for the tooltip (default is black with opacity).
+  /// [borderRadius] is the border radius for the tooltip (default is 8.0).
   ///
   /// The tooltip will automatically adjust its position based on available space,
   /// ensuring it does not overflow the screen edges.
@@ -94,8 +97,12 @@ class DFTooltip extends StatefulWidget {
 }
 
 class _DFTooltipState extends State<DFTooltip> {
+  // The overlay entry that contains the tooltip
   OverlayEntry? _overlayEntry;
+  // Flag to track tooltip visibility state
   bool _isTooltipVisible = false;
+  // list of references to scroll position for hiding on scroll, if any of the scrolls moves, the tooltip will hide
+
   final List<ScrollPosition> _scrollPositions = [];
 
   // Subscribe to ALL scroll events in the widget hierarchy
@@ -112,18 +119,11 @@ class _DFTooltipState extends State<DFTooltip> {
           final position = scrollableState.position;
           final canScroll = position.maxScrollExtent > 0;
 
-          log('Found scrollable: ${scrollableState.widget.runtimeType}');
-          log('Max scroll extent: ${position.maxScrollExtent}');
-          log('Can actually scroll: $canScroll');
-
           // Subscribe to ALL scrollables that can scroll, not just the first one
           // in case there are multiple scrollables in the hierarchy
           if (canScroll) {
             _scrollPositions.add(position);
             position.addListener(_onScroll);
-            log(
-              'Subscribed to scrollable: ${scrollableState.widget.runtimeType}',
-            );
           }
         }
 
@@ -134,8 +134,6 @@ class _DFTooltipState extends State<DFTooltip> {
           break;
         }
       }
-
-      log('Total scrollables subscribed: ${_scrollPositions.length}');
     } catch (e) {
       log('Error in _subscribeScroll: $e');
     }
