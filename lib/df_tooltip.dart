@@ -50,6 +50,10 @@ class DFTooltip extends StatefulWidget {
   final Color?
   bgColor; // Background color for the tooltip (optional is Black with opacity)
   final BorderRadius? borderRadius; // Optional border radius for the tooltip
+  final Color? borderColor; // Optional border color for the tooltip
+  final double? borderWidth; // Optional border width for the tooltip
+  final double arrowHeight; // Height of the tooltip arrow
+  final double arrowWidth; // Width of the tooltip arrow
 
   // Static const color for default background
   static const Color _defaultBgColor = Color(
@@ -72,6 +76,10 @@ class DFTooltip extends StatefulWidget {
   /// [upnDownTooltipWidth] is the custom width for up/down tooltips (default is null, which means it will use full width minus margins).
   /// [bgColor] is the background color for the tooltip (default is black with opacity).
   /// [borderRadius] is the border radius for the tooltip (default is 8.0).
+  /// [borderColor] is the border color for the tooltip (default is null, which means no border).
+  /// [borderWidth] is the border width for the tooltip (default is null, which means no border).
+  /// [arrowHeight] is the height of the tooltip arrow (default is 8.0).
+  /// [arrowWidth] is the width of the tooltip arrow (default is 16.0).
   ///
   /// The tooltip will automatically adjust its position based on available space,
   /// ensuring it does not overflow the screen edges.
@@ -90,6 +98,10 @@ class DFTooltip extends StatefulWidget {
     this.upnDownTooltipWidth,
     this.bgColor = _defaultBgColor,
     this.borderRadius = _defaultBorderRadius,
+    this.borderColor,
+    this.borderWidth,
+    this.arrowHeight = 8.0,
+    this.arrowWidth = 16.0,
   });
 
   @override
@@ -373,6 +385,12 @@ class _DFTooltipState extends State<DFTooltip> {
               widget.bgColor ??
               DFTooltip._defaultBgColor, // Use widget's bgColor or default
           borderRadius: widget.borderRadius ?? DFTooltip._defaultBorderRadius,
+          border: widget.borderColor != null && widget.borderWidth != null
+              ? Border.all(
+                  color: widget.borderColor!,
+                  width: widget.borderWidth!,
+                )
+              : null,
         ),
         child: widget.content, // User's custom content
       ),
@@ -380,6 +398,11 @@ class _DFTooltipState extends State<DFTooltip> {
 
     // Combine tooltip box with arrow based on direction
     final arrowColor = widget.bgColor ?? DFTooltip._defaultBgColor;
+    final arrowBorderColor = widget.borderColor;
+    final arrowBorderWidth = widget.borderWidth ?? 0.0;
+
+    // Overlap amount to hide the border radius gap (should be slightly more than border radius)
+    final overlap = 2.0;
 
     switch (direction) {
       case TooltipDirection.up:
@@ -387,29 +410,49 @@ class _DFTooltipState extends State<DFTooltip> {
           mainAxisSize: MainAxisSize.min,
           children: [
             tooltipBox, // Tooltip box on top
-            CustomPaint(
-              // Arrow pointing down (tooltip is above target)
-              size: const Size(16, 8),
-              painter: _TrianglePainter(
-                color: arrowColor,
-                direction: TooltipDirection.up,
+            Transform.translate(
+              offset: Offset(0, -overlap), // Move arrow up to overlap
+              child: CustomPaint(
+                // Arrow pointing down (tooltip is above target)
+                size: Size(widget.arrowWidth, widget.arrowHeight + overlap),
+                painter: _TrianglePainter(
+                  color: arrowColor,
+                  borderColor: arrowBorderColor,
+                  borderWidth: arrowBorderWidth,
+                  direction: TooltipDirection.up,
+                  overlap: overlap,
+                ),
               ),
             ),
           ],
         );
       case TooltipDirection.down:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
+        return Stack(
+          clipBehavior: Clip.none,
           children: [
-            CustomPaint(
-              // Arrow pointing up (tooltip is below target)
-              size: const Size(16, 8),
-              painter: _TrianglePainter(
-                color: arrowColor,
-                direction: TooltipDirection.down,
+            Padding(
+              padding: EdgeInsets.only(top: widget.arrowHeight),
+              child: tooltipBox, // Tooltip box on bottom
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Align(
+                alignment: Alignment.center,
+                child: CustomPaint(
+                  // Arrow pointing up (tooltip is below target)
+                  size: Size(widget.arrowWidth, widget.arrowHeight + overlap),
+                  painter: _TrianglePainter(
+                    color: arrowColor,
+                    borderColor: arrowBorderColor,
+                    borderWidth: arrowBorderWidth,
+                    direction: TooltipDirection.down,
+                    overlap: overlap,
+                  ),
+                ),
               ),
             ),
-            tooltipBox, // Tooltip box on bottom
           ],
         );
       case TooltipDirection.left:
@@ -417,29 +460,49 @@ class _DFTooltipState extends State<DFTooltip> {
           mainAxisSize: MainAxisSize.min,
           children: [
             tooltipBox, // Tooltip box on left
-            CustomPaint(
-              // Arrow pointing right (tooltip is left of target)
-              size: const Size(8, 16),
-              painter: _TrianglePainter(
-                color: arrowColor,
-                direction: TooltipDirection.left,
+            Transform.translate(
+              offset: Offset(-overlap, 0), // Move arrow left to overlap
+              child: CustomPaint(
+                // Arrow pointing right (tooltip is left of target)
+                size: Size(widget.arrowHeight + overlap, widget.arrowWidth),
+                painter: _TrianglePainter(
+                  color: arrowColor,
+                  borderColor: arrowBorderColor,
+                  borderWidth: arrowBorderWidth,
+                  direction: TooltipDirection.left,
+                  overlap: overlap,
+                ),
               ),
             ),
           ],
         );
       case TooltipDirection.right:
-        return Row(
-          mainAxisSize: MainAxisSize.min,
+        return Stack(
+          clipBehavior: Clip.none,
           children: [
-            CustomPaint(
-              // Arrow pointing left (tooltip is right of target)
-              size: const Size(8, 16),
-              painter: _TrianglePainter(
-                color: arrowColor,
-                direction: TooltipDirection.right,
+            Padding(
+              padding: EdgeInsets.only(left: widget.arrowHeight),
+              child: tooltipBox, // Tooltip box on right
+            ),
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Align(
+                alignment: Alignment.center,
+                child: CustomPaint(
+                  // Arrow pointing left (tooltip is right of target)
+                  size: Size(widget.arrowHeight + overlap, widget.arrowWidth),
+                  painter: _TrianglePainter(
+                    color: arrowColor,
+                    borderColor: arrowBorderColor,
+                    borderWidth: arrowBorderWidth,
+                    direction: TooltipDirection.right,
+                    overlap: overlap,
+                  ),
+                ),
               ),
             ),
-            tooltipBox, // Tooltip box on right
           ],
         );
     }
@@ -472,44 +535,148 @@ class _DFTooltipState extends State<DFTooltip> {
 // Custom painter to draw triangular arrows pointing toward the target
 class _TrianglePainter extends CustomPainter {
   final Color color;
+  final Color? borderColor;
+  final double borderWidth;
   final TooltipDirection direction;
+  final double overlap;
 
-  _TrianglePainter({required this.color, required this.direction});
+  _TrianglePainter({
+    required this.color,
+    this.borderColor,
+    required this.borderWidth,
+    required this.direction,
+    required this.overlap,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
     final path = Path();
 
     // Draw triangle pointing in the correct direction
+    // The base of the triangle extends by 'overlap' to hide the border radius gap
     switch (direction) {
       case TooltipDirection.up:
         // Arrow pointing down (tooltip is above, arrow points to target below)
-        path.moveTo(0, 0);
-        path.lineTo(size.width / 2, size.height);
-        path.lineTo(size.width, 0);
+        // Draw triangle with rectangle extension at the top
+        path.moveTo(0, 0); // Top-left of rectangle
+        path.lineTo(
+          0,
+          overlap,
+        ); // Bottom-left of rectangle (triangle base start)
+        path.lineTo(size.width / 2, size.height); // Triangle tip
+        path.lineTo(
+          size.width,
+          overlap,
+        ); // Bottom-right of rectangle (triangle base end)
+        path.lineTo(size.width, 0); // Top-right of rectangle
         break;
       case TooltipDirection.down:
         // Arrow pointing up (tooltip is below, arrow points to target above)
-        path.moveTo(0, size.height);
-        path.lineTo(size.width / 2, 0);
-        path.lineTo(size.width, size.height);
+        // Draw triangle with rectangle extension at the bottom
+        path.moveTo(0, size.height); // Bottom-left of rectangle
+        path.lineTo(
+          0,
+          size.height - overlap,
+        ); // Top-left of rectangle (triangle base start)
+        path.lineTo(size.width / 2, 0); // Triangle tip
+        path.lineTo(
+          size.width,
+          size.height - overlap,
+        ); // Top-right of rectangle (triangle base end)
+        path.lineTo(size.width, size.height); // Bottom-right of rectangle
         break;
       case TooltipDirection.left:
         // Arrow pointing right (tooltip is left, arrow points to target right)
-        path.moveTo(size.width, size.height / 2);
-        path.lineTo(0, 0);
-        path.lineTo(0, size.height);
+        // Draw triangle with rectangle extension on the left
+        path.moveTo(0, 0); // Top-left of rectangle
+        path.lineTo(overlap, 0); // Top-right of rectangle (triangle base start)
+        path.lineTo(size.width, size.height / 2); // Triangle tip
+        path.lineTo(
+          overlap,
+          size.height,
+        ); // Bottom-right of rectangle (triangle base end)
+        path.lineTo(0, size.height); // Bottom-left of rectangle
         break;
       case TooltipDirection.right:
         // Arrow pointing left (tooltip is right, arrow points to target left)
-        path.moveTo(0, size.height / 2);
-        path.lineTo(size.width, 0);
-        path.lineTo(size.width, size.height);
+        // Draw triangle with rectangle extension on the right
+        path.moveTo(size.width, 0); // Top-right of rectangle
+        path.lineTo(
+          size.width - overlap,
+          0,
+        ); // Top-left of rectangle (triangle base start)
+        path.lineTo(0, size.height / 2); // Triangle tip
+        path.lineTo(
+          size.width - overlap,
+          size.height,
+        ); // Bottom-left of rectangle (triangle base end)
+        path.lineTo(size.width, size.height); // Bottom-right of rectangle
         break;
     }
     path.close();
-    canvas.drawPath(path, paint); // Draw the triangle
+
+    // Draw filled triangle
+    canvas.drawPath(path, paint);
+
+    // Draw border on two sides only (not the base that touches the tooltip box)
+    if (borderColor != null && borderWidth > 0) {
+      final borderPaint = Paint()
+        ..color = borderColor!
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderWidth
+        ..strokeCap = StrokeCap.round;
+
+      final borderPath = Path();
+
+      switch (direction) {
+        case TooltipDirection.up:
+          // Border on left and right sides only (not top base)
+          borderPath.moveTo(0, overlap); // Start from overlap point
+          borderPath.lineTo(size.width / 2, size.height); // To tip
+          borderPath.moveTo(size.width, overlap); // Start from overlap point
+          borderPath.lineTo(size.width / 2, size.height); // To tip
+          break;
+        case TooltipDirection.down:
+          // Border on left and right sides only (not bottom base)
+          borderPath.moveTo(
+            0,
+            size.height - overlap,
+          ); // Start from overlap point
+          borderPath.lineTo(size.width / 2, 0); // To tip
+          borderPath.moveTo(
+            size.width,
+            size.height - overlap,
+          ); // Start from overlap point
+          borderPath.lineTo(size.width / 2, 0); // To tip
+          break;
+        case TooltipDirection.left:
+          // Border on top and bottom sides only (not right base)
+          borderPath.moveTo(overlap, 0); // Start from overlap point
+          borderPath.lineTo(size.width, size.height / 2); // To tip
+          borderPath.moveTo(overlap, size.height); // Start from overlap point
+          borderPath.lineTo(size.width, size.height / 2); // To tip
+          break;
+        case TooltipDirection.right:
+          // Border on top and bottom sides only (not left base)
+          borderPath.moveTo(
+            size.width - overlap,
+            0,
+          ); // Start from overlap point
+          borderPath.lineTo(0, size.height / 2); // To tip
+          borderPath.moveTo(
+            size.width - overlap,
+            size.height,
+          ); // Start from overlap point
+          borderPath.lineTo(0, size.height / 2); // To tip
+          break;
+      }
+
+      canvas.drawPath(borderPath, borderPaint);
+    }
   }
 
   @override

@@ -7,7 +7,9 @@ A highly customizable and intelligent Flutter tooltip widget that automatically 
 - **Smart Positioning**: Automatically adjusts tooltip position based on available screen space
 - **Multiple Directions**: Support for up, down, left, and right positioning
 - **Auto-hide on Scroll**: Intelligently hides when user scrolls, perfect for scrollable content
-- **Customizable Appearance**: Full control over colors, border radius, and dimensions
+- **Customizable Appearance**: Full control over colors, borders, border radius, and dimensions
+- **Border Support**: Add custom borders with configurable color and width
+- **Arrow Customization**: Customize arrow size and appearance
 - **Flexible Sizing**: Different width options for vertical vs horizontal tooltips
 - **Auto-dismiss**: Optional auto-hide with customizable duration
 - **Tap to Dismiss**: Click anywhere outside to hide the tooltip
@@ -21,6 +23,7 @@ A highly customizable and intelligent Flutter tooltip widget that automatically 
 | **Different Directions - Right** | ![Directions](assets/tooltip-right.png) |
 | **Changes position if there is no space** | ![Changes position if there is no space](assets/tooltip-bottom-top-nospace.png) |
 | **Styling** | ![Styling](assets/tooltip-different-style.png) |
+| **Border support** | ![Styling](assets/df_tooltip_example.png) |
 
 ## 📦 Installation
 
@@ -83,6 +86,10 @@ DFTooltip(
   preferredDirection: TooltipDirection.up,
   bgColor: Colors.blue.withOpacity(0.9),
   borderRadius: BorderRadius.circular(12),
+  borderColor: Colors.white,
+  borderWidth: 2.0,
+  arrowHeight: 10.0,
+  arrowWidth: 20.0,
   margin: 8.0,
   duration: Duration(seconds: 3),
   sideTooltipWidth: 200,
@@ -130,6 +137,10 @@ ListView.builder(
 | `upnDownTooltipWidth` | `double?` | `null` | Custom width for up/down tooltips |
 | `bgColor` | `Color?` | `Color(0xCC000000)` | Background color of the tooltip |
 | `borderRadius` | `BorderRadius?` | `BorderRadius.circular(8)` | Border radius of the tooltip |
+| `borderColor` | `Color?` | `null` | Border color (requires borderWidth) |
+| `borderWidth` | `double?` | `null` | Border width (requires borderColor) |
+| `arrowHeight` | `double` | `8.0` | Height of the tooltip arrow |
+| `arrowWidth` | `double` | `16.0` | Width of the tooltip arrow |
 
 ### Tooltip Directions
 
@@ -143,6 +154,29 @@ enum TooltipDirection {
 ```
 
 ## 🎨 Styling Examples
+
+### Tooltip with Border
+```dart
+DFTooltip(
+  bgColor: Colors.white,
+  borderColor: Colors.blue,
+  borderWidth: 2.0,
+  borderRadius: BorderRadius.circular(8),
+  content: Text('Tooltip with border', style: TextStyle(color: Colors.black)),
+  child: YourWidget(),
+)
+```
+
+### Custom Arrow Size
+```dart
+DFTooltip(
+  bgColor: Colors.green.withOpacity(0.9),
+  arrowHeight: 12.0,
+  arrowWidth: 24.0,
+  content: Text('Larger arrow!', style: TextStyle(color: Colors.white)),
+  child: YourWidget(),
+)
+```
 
 ### Dark Theme Tooltip
 ```dart
@@ -171,6 +205,8 @@ DFTooltip(
   upnDownTooltipWidth: 400,
   bgColor: Colors.white,
   borderRadius: BorderRadius.circular(12),
+  borderColor: Colors.grey[300],
+  borderWidth: 1.5,
   content: Container(
     padding: EdgeInsets.all(16),
     child: Column(
@@ -178,9 +214,10 @@ DFTooltip(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Detailed Information', 
-             style: TextStyle(fontWeight: FontWeight.bold)),
+             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
         SizedBox(height: 8),
-        Text('This tooltip contains more detailed information...'),
+        Text('This tooltip contains more detailed information...', 
+             style: TextStyle(color: Colors.black87)),
       ],
     ),
   ),
